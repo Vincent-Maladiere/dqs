@@ -25,18 +25,35 @@ class MLP(nn.Module):
 
 if __name__ == '__main__':
     # prepare data
-    x = np.random.rand(1000,3)
-    y = np.random.rand(1000)
-    e = (np.random.rand(1000) > 0.5)
+    from time import time
+
+    tic = time()
+    x = np.random.rand(100_000,2000)
+    y = np.random.rand(100_000)
+    e = (np.random.rand(100_000) > 0.5)
+
+    # from hazardous.data._competing_weibull import make_synthetic_competing_weibull
+
+    # x, y_ = make_synthetic_competing_weibull(
+    #     n_events=1,
+    #     n_samples=1000,
+    #     n_features=20,
+    #     return_X_y=True,
+    #     complex_features=True,
+    # )
+    # x = x.values
+    # y = y_["duration"].values.ravel()
+    # e = y_["event"].values.ravel()
+
     data_x = torch.from_numpy(x.astype(np.float32)).clone()
     data_y = torch.from_numpy(y.astype(np.float32)).clone()
     data_e = torch.from_numpy(e).clone()
 
     # prepare model
-    boundaries = torch.linspace(0.0, 1.0, 5)
+    boundaries = torch.linspace(0.0, 1, 5)
     dist = DistributionLinear(boundaries)
     loss_fn = NegativeLogLikelihood(dist, boundaries)
-    mlp = MLP(3, 4)
+    mlp = MLP(2000, 4)
 
     # train model
     optimizer = torch.optim.Adam(mlp.parameters(), lr=0.01)
@@ -47,3 +64,5 @@ if __name__ == '__main__':
         optimizer.step()
         optimizer.zero_grad()
         print('epoch=%d, loss=%f' % (epoch,loss))
+    toc = time()
+    print(toc - tic)
